@@ -7,12 +7,17 @@ def _print_stub():
     print "This is a stub."
 
 class MainFrame(Tkinter.Frame):
-    """
-     Main frame class.
+    """メインフレーム。
+
+     オリジナルの画像とフィルタされた画像を表示する。
     """
     def __init__(self, master=None, width=800, height=600):
-        """
-         コンストラクタ。
+        """コンストラクタ。
+
+         Args:
+            master: 親クラス
+            width: 画像幅
+            height: 画像の高さ
         """
         # スーパークラスのコンストラクタの呼び出し
         Tkinter.Frame.__init__(self, master)
@@ -35,20 +40,19 @@ class MainFrame(Tkinter.Frame):
         self.__enable_colored_flag_cascade()
 
     def get_bitfile_name(self):
-        """
-         ビットファイル名を取得
+        """ビットファイル名を取得する。
         """
         return tkFileDialog.askopenfilename(
             parent=self, filetypes=[('ビットファイル','*.bit')])
 
     def get_config(self):
-        """
-         フィルタリングの設定を取得
+        """フィルタリングの設定を取得する。
         """
         return (self.__config[0].get(), self.__config[1].get())
 
     def update_image(self, original, filtered):
-        """
+        """画像をセットし、画面を更新する
+
          Args:
             original: カメラからのオリジナル画像
             filtered: フィルタがかけられた画像
@@ -83,15 +87,14 @@ class MainFrame(Tkinter.Frame):
         self.__colored_flag_cascade.entryconfig(index=1, state=Tkinter.NORMAL)
 
     def __initialize_config(self):
-        """
-         メンバの宣言、初期化。
+        """メンバの宣言、初期化を行う。
         """
         self.__config = (
             Tkinter.IntVar(value=100), Tkinter.BooleanVar(value=False))
 
     def __initialize_canvas(self, width, height):
-        """
-         キャンバス、キャンバス内の画像オブジェクト、画像を作成。
+        """キャンバス、キャンバス内の画像オブジェクト、画像を作成する。
+
          Args:
             width: 画面幅
             height: 画面の高さ
@@ -113,8 +116,10 @@ class MainFrame(Tkinter.Frame):
             width, 0, anchor=Tkinter.NW, image=self.__filtered_image)
 
     def __initialize_menu(self, master=None):
-        """
-         メニューを作成。
+        """メニューを作成。
+
+         Args:
+            master: 親オブジェクト
         """
         # メニュー
         self.__menu = Tkinter.Menu(self, tearoff=0)
