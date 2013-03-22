@@ -64,14 +64,28 @@ class MainFrame(Tkinter.Frame):
             filtered: フィルタがかけられた画像
          TODO(鈴木):まだ仮設置
         """
-        self.__original_image = original
-        self.__filtered_image = filtered
+        # 画像をセット
+        self.__original_image[self.__foreground_index] = original
+        self.__filtered_image[self.__foreground_index] = filtered
+        # 画面を更新
         self.__canvas.itemconfigure(
-            self.__original_image_item, image=self.__original_image)
-        self.__canvas.update()
+            self.__original_image_item[self.__foreground_index],
+            image=self.__original_image[self.__foreground_index],
+            state=Tkinter.NORMAL)
         self.__canvas.itemconfigure(
-            self.__filtered_image_item, image=self.__filtered_image)
+            self.__filtered_image_item[self.__foreground_index],
+            image=self.__filtered_image[self.__foreground_index],
+            state=Tkinter.NORMAL)
+        self.__canvas.itemconfigure(
+            self.__original_image_item[self.__background_index],
+            state=Tkinter.HIDDEN)
+        self.__canvas.itemconfigure(
+            self.__filtered_image_item[self.__background_index],
+            state=Tkinter.HIDDEN)
         self.__canvas.update()
+        # インデックスを更新
+        self.__foreground_index = 1 if self.__foreground_index == 0 else 0
+        self.__background_index = 1 if self.__background_index == 0 else 0
 
     def __initialize_config(self):
         """メンバの宣言、初期化を行う。
@@ -93,14 +107,31 @@ class MainFrame(Tkinter.Frame):
         # 画像
         # TODO(鈴木):キャンバスがきちんと配置されているかどうか、確認のため
         #            サンプルを読み込む
-        self.__original_image = Tkinter.PhotoImage(file='sample.gif')
+        self.__original_image = [Tkinter.PhotoImage(file='sample.gif')]
+        self.__original_image.append(Tkinter.PhotoImage(file='sample.gif'))
 #        self.__original_image = Tkinter.PhotoImage()
-        self.__filtered_image = Tkinter.PhotoImage()
+        self.__filtered_image = [Tkinter.PhotoImage()]
+        self.__filtered_image.append(Tkinter.PhotoImage())
 
-        self.__original_image_item = self.__canvas.create_image(
-            0, 0, anchor=Tkinter.NW, image=self.__original_image)
-        self.__filtered_image_item = self.__canvas.create_image(
-            width, 0, anchor=Tkinter.NW, image=self.__filtered_image)
+        self.__original_image_item = [
+            self.__canvas.create_image(
+                0, 0, anchor=Tkinter.NW, image=self.__original_image[0])
+        ]
+        self.__original_image_item.append(
+            self.__canvas.create_image(
+                0, 0, anchor=Tkinter.NW, image=self.__original_image[1])
+        )
+        self.__filtered_image_item = [
+            self.__canvas.create_image(
+                width, 0, anchor=Tkinter.NW, image=self.__filtered_image[0])
+        ]
+        self.__filtered_image_item.append(
+            self.__canvas.create_image(
+                width, 0, anchor=Tkinter.NW, image=self.__filtered_image[1])
+        )
+
+        self.__foreground_index = 0
+        self.__background_index = 1
 
     def __initialize_menu(self, master=None):
         """メニューを作成。
