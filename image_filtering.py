@@ -23,8 +23,6 @@ class ImageFiltering(threading.Thread):
                 if not self.__is_running:
                     print "a thread was stopped"
                     return
-            time.sleep(0.5)
-#            print "a thread is running"
             original = self.__capture.get_frame()
             filtered = self.__capture.get_grayscale_frame()
             self.__observer.update_image(original, filtered)
