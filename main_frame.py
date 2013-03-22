@@ -68,9 +68,10 @@ class MainFrame(Tkinter.Frame):
         self.__filtered_image = filtered
         self.__canvas.itemconfigure(
             self.__original_image_item, image=self.__original_image)
+        self.__canvas.update()
         self.__canvas.itemconfigure(
             self.__filtered_image_item, image=self.__filtered_image)
-        self.update()
+        self.__canvas.update()
 
     def __initialize_config(self):
         """メンバの宣言、初期化を行う。
@@ -166,4 +167,12 @@ class MainFrame(Tkinter.Frame):
         print "%d MHz, %r" % (
             self.__config[0].get(), self.__config[1].get()
         )
+
+    def quit(self):
+        self.__controller.quit()
+        Tkinter.Frame.quit(self)
+
+    def destroy(self):
+        self.__controller.quit()
+        Tkinter.Frame.destroy(self)
 
