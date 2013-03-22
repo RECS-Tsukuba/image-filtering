@@ -2,16 +2,16 @@
 
 import Tkinter
 import tkFileDialog
-
-def _print_stub():
-    print "This is a stub."
+import controller
+import functools
 
 class MainFrame(Tkinter.Frame):
     """メインフレーム。
 
      オリジナルの画像とフィルタされた画像を表示する。
     """
-    def __init__(self, master=None, width=800, height=600):
+    def __init__(
+        self, master=None, controller=controller.Controller(), width=800, height=600):
         """コンストラクタ。
 
          Args:
@@ -22,6 +22,8 @@ class MainFrame(Tkinter.Frame):
         # スーパークラスのコンストラクタの呼び出し
         Tkinter.Frame.__init__(self, master)
 
+        self.__controller=controller
+
         # 初期化
         self.__initialize_config()
         self.__initialize_menu()
@@ -31,13 +33,17 @@ class MainFrame(Tkinter.Frame):
             menu=self.__menu, width=width*2, height=height, bg='black')
         self.__canvas.pack(side=Tkinter.LEFT)
 
-    def disable_config(self):
-        self.__disable_frequency_cascade()
-        self.__disable_colored_flag_cascade()
+    def disable_config_menu(self):
+        self.__set_config_menu_state(Tkinter.DISABLED)
 
-    def enable_config(self):
-        self.__enable_freqency_cascade()
-        self.__enable_colored_flag_cascade()
+    def disable_control(self):
+        self.__set_control_menu_state(Tkinter.DISABLED, Tkinter.NORMAL)
+
+    def enable_config_menu(self):
+        self.__set_config_menu_state(Tkinter.NORMAL)
+
+    def enable_control(self):
+        self.__set_control_menu_state(Tkinter.NORMAL, Tkinter.DISABLED)
 
     def get_bitfile_name(self):
         """ビットファイル名を取得する。
@@ -65,26 +71,6 @@ class MainFrame(Tkinter.Frame):
         self.__canvas.itemconfigure(
             self.__filtered_image_item, image=self.__filtered_image)
         self.update()
-
-    def __disable_frequency_cascade(self):
-        self.__frequency_cascade.entryconfig(index=0, state=Tkinter.DISABLED)
-        self.__frequency_cascade.entryconfig(index=1, state=Tkinter.DISABLED)
-        self.__frequency_cascade.entryconfig(index=2, state=Tkinter.DISABLED)
-
-    def __disable_colored_flag_cascade(self):
-        self.__colored_flag_cascade.entryconfig(
-            index=0, state=Tkinter.DISABLED)
-        self.__colored_flag_cascade.entryconfig(
-            index=1, state=Tkinter.DISABLED)
-
-    def __enable_freqency_cascade(self):
-        self.__frequency_cascade.entryconfig(index=0, state=Tkinter.NORMAL)
-        self.__frequency_cascade.entryconfig(index=1, state=Tkinter.NORMAL)
-        self.__frequency_cascade.entryconfig(index=2, state=Tkinter.NORMAL)
-
-    def __enable_colored_flag_cascade(self):
-        self.__colored_flag_cascade.entryconfig(index=0, state=Tkinter.NORMAL)
-        self.__colored_flag_cascade.entryconfig(index=1, state=Tkinter.NORMAL)
 
     def __initialize_config(self):
         """メンバの宣言、初期化を行う。
@@ -124,18 +110,23 @@ class MainFrame(Tkinter.Frame):
         # メニュー
         self.__menu = Tkinter.Menu(self, tearoff=0)
         # カスケードを追加
-        main_cascade = Tkinter.Menu(self.__menu, tearoff=False)
+        self.__main_cascade = Tkinter.Menu(self.__menu, tearoff=False)
         self.__frequency_cascade = Tkinter.Menu(self.__menu, tearoff=False)
         self.__colored_flag_cascade = Tkinter.Menu(self.__menu, tearoff=False)
-        self.__menu.add_cascade(label='メニュー', under=0, menu=main_cascade)
+        self.__menu.add_cascade(label='メニュー', under=0, menu=self.__main_cascade)
         self.__menu.add_cascade(
             label='動作周波数', under=0, menu=self.__frequency_cascade)
         self.__menu.add_cascade(
             label='元画像の色', under=0, menu=self.__colored_flag_cascade)
         # メインメニューにアイテムを追加
-        main_cascade.add_command(label='開始', under=0, command=_print_stub)
-        main_cascade.add_command(label='停止', under=3, command=_print_stub)
-        main_cascade.add_command(label='終了', under=0, command=self.quit)
+        self.__main_cascade.add_command(
+            label='開始', under=0,
+            command=functools.partial(self.__controller.start_filtering, self))
+        self.__main_cascade.add_command(
+            label='停止', under=3, state=Tkinter.DISABLED,
+            command=functools.partial(self.__controller.stop_filtering, self))
+        self.__main_cascade.add_command(
+            label='終了', under=0, command=self.quit)
         # 動作周波数メニューにアイテムを追加
         self.__frequency_cascade.add_radiobutton(
             label='100 MHz', variable=self.__config[0], value=100)
@@ -153,11 +144,23 @@ class MainFrame(Tkinter.Frame):
         test_cascade = Tkinter.Menu(self.__menu, tearoff=False)
         self.__menu.add_cascade(label='test', under=0, menu=test_cascade)
         test_cascade.add_command(
-            label='disable' ,under=0, command=self.disable_config)
+            label='disable' ,under=0, command=self.disable_config_menu)
         test_cascade.add_command(
-            label='enable' ,under=0, command=self.enable_config)
+            label='enable' ,under=0, command=self.enable_config_menu)
         test_cascade.add_command(
             label='show___config' ,under=0, command=self.__show_confg)
+
+    def __set_control_menu_state(self, state_start, state_stop):
+        self.__main_cascade.entryconfig(index=0, state=state_start)
+        self.__main_cascade.entryconfig(index=1, state=state_stop)
+
+    def __set_config_menu_state(self, state):
+        self.__frequency_cascade.entryconfig(index=0, state=state)
+        self.__frequency_cascade.entryconfig(index=1, state=state)
+        self.__frequency_cascade.entryconfig(index=2, state=state)
+
+        self.__colored_flag_cascade.entryconfig(index=0, state=state)
+        self.__colored_flag_cascade.entryconfig(index=1, state=state)
 
     def __show_confg(self):
         print "%d MHz, %r" % (
